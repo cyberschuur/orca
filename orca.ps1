@@ -5,6 +5,13 @@ Windows enumeration script with privilege-based execution.
 This script performs Windows enumeration for privilege escalation and recon.
 It allows running as either a standard user or with local admin privileges.
 If the -localadmin flag is specified, admin-only checks will also run.
+
+By default slow operations are excluded. Use the -extended flag to include these:
+    - Get-ExplicitLogonEvents
+    - Get-Hotfixes
+    - Get-ProcessCreationEvents
+    - Get-MicrosoftUpdates
+    - Get-LogonEvents
 .EXAMPLE
 PS > .\orca.ps1
 Runs standard user enumeration checks.
@@ -12,12 +19,16 @@ Runs standard user enumeration checks.
 PS > .\orca.ps1 -localadmin
 Runs both standard and admin-required checks.
 .EXAMPLE
+PS > .\orca.ps1 -localadmin -extenced
+Runs both standard and admin-required checks _and_ extended checks.
+.EXAMPLE
 PS > .\orca.ps1 -OutputFileName results.txt
 Writes results to results.txt.
 #>
 
 Param(
     [Switch]$localadmin,   # Runs admin-only checks if specified
+    [Switch]$extended,     # Runs extended checks (much slower)
     [String]$o = ""
 )
 
@@ -1024,11 +1035,11 @@ function Get-DpapiMasterKeys {
 # 🔹 Execution Based on Privileges
 # -------------------------------
 function ORCA {
-    Write-Host "\nRunning O.R.C.A. (OS Recon & Configuration Auditor)"
+    Write-Host "Running O.R.C.A. (OS Recon & Configuration Auditor)"
     
     $output = @()
     $output += ""
-    $output += "                                               @@@@                                                      "
+    $output += "                                             @@@@                                                      "
     $output += "                                       @@@@@@@@@                                                    "
     $output += "                                    @@@@@@@@@@@                                                    "
     $output += "                                 @@@@@@@@@@@@@@                                                    "
@@ -1053,12 +1064,8 @@ function ORCA {
     $output += "                                        @@@@@@@@@@@@@@                            @@@@@@@@@@        "
     $output += "                                             @@@@                                  @@@@@@@@@        "
     $output += "                                                                                    @@@@@@@         "
-    $output += "                                                                                      @@@@          "
+    $output += "         O.R.C.A (OS Recon & Configuration Auditor)                                   @@@@          "
     $output += "                                                                                       @@           "
-    $output += "    ############################################################"
-    $output += "    ##     O.R.C.A (OS Recon & Configuration Auditor)        ##"
-    $output += "    ##                                                        ##"
-    $output += "    ############################################################"
     
     
     # Run Standard User Checks
@@ -1074,14 +1081,12 @@ function ORCA {
     $output += Get-DotNetVersion
     $output += Get-EnvironmentPath
     $output += Get-EnvironmentVariables
-    #$output += Get-ExplicitLogonEvents slow
     #$output += Get-ExplorerMRUs looks unnecessary
     $output += Get-ExplorerRunCommands
     $output += Get-FileInfo
     $output += Get-FileZilla
     $output += Get-FirefoxPresence
     $output += Get-FirefoxHistory
-    #$output += Get-Hotfixes slow but necessary
     $output += Get-IEFavorites
     $output += Get-IETabs
     $output += Get-IEUrls
@@ -1097,15 +1102,13 @@ function ORCA {
     # $output += Get-LocalGPOs very unsure this works
     $output += Get-LocalGroups
     $output += Get-LocalUsers
-    #$output += Get-LogonEvents slow
     $output += Get-LogonSessions
     $output += Get-MTPuTTY
     $output += Get-MappedDrives
     $output += Get-McAfeeConfigs
     $output += Get-McAfeeSiteList
-    #$output += Get-MicrosoftUpdates slow
     $output += Get-NTLMSettings
-    #$output += Get-NamedPipes no clue what this does
+    $output += Get-NamedPipes
     $output += Get-NetworkShares
     $output += Get-OSInfo
     $output += Get-OfficeMRUs
@@ -1118,7 +1121,6 @@ function ORCA {
     $output += Get-PowerShellHistory
     $output += Get-PoweredOnEvents
     $output += Get-Printers
-    #$output += Get-ProcessCreationEvents slow
     $output += Get-ProcessOwners
     $output += Get-Processes
     $output += Get-PuttyHostKeys
@@ -1167,6 +1169,15 @@ function ORCA {
         $output += Get-AppLocker
         $output += Get-AuditPolicies
         $output += Get-DpapiMasterKeys
+    }
+
+    if ($extended) {
+        Write-Host "[*] Running Extended Checks..."
+        $output += Get-ExplicitLogonEvents slow
+        $output += Get-Hotfixes slow but necessary
+        $output += Get-ProcessCreationEvents slow
+        $output += Get-MicrosoftUpdates slow
+        $output += Get-LogonEvents slow
     }
 
     # Output Handling
