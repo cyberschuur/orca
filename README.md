@@ -1,6 +1,6 @@
 # orca - a Windows Enumeration Script
 
-orca (OS Recon & Configuration Auditor) is a PowerShell script that enumerates Windows system information for both standard and admin users. It can also run extended checks that are more time-consuming, but provide deeper insights.
+orca (OS Recon & Configuration Auditor) is basically a Frankensteined combination of [JAWS](https://github.com/411Hall/JAWS/tree/master) and [Seatbelt](https://github.com/GhostPack/Seatbelt). It is a PowerShell script that enumerates Windows system information for both standard and admin users. It can also run extended checks that are more time-consuming, but give useful results.
 
 ## Usage
 
